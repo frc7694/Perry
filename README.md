@@ -6,3 +6,6 @@ Our 2023 Robot
 - NE District Hartford District Event (Champions)
 - NE District Championship
 - CIAC State Championship (Semi-finalists)
+
+### Template Used
+[Rev Robotics Swerve Template](https://github.com/REVrobotics/MAXSwerve-Java-Template)
