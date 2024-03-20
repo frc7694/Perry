@@ -16,10 +16,13 @@ import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.*;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.controls.inputs.Controller;
-import frc.util.SwerveUtils;
+import frc.robot.OI.axis.XBox.TriggerAxis;
+import frc.robot.values.Constants.*;
+import frc.robot.swerve.MAXSwerveModule;
+import frc.robot.systems.Orangutan;
+import frc.robot.swerve.SwerveUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.values.Variables;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
@@ -121,20 +124,13 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean rateLimit) {
 
-//    if (Math.abs(xSpeed) < Constants.OIConstants.kDriveDeadband
-//            && Math.abs(ySpeed) < Constants.OIConstants.kDriveDeadband
-//            && Math.abs(rot) < Constants.OIConstants.kDriveDeadband) {
-//      setModuleStates(RunningConfig.lastStates);
-//      return;
-//    }
-
     double xSpeedCommanded;
     double ySpeedCommanded;
 
     if (rateLimit) {
       // Convert XY to polar for rate limiting
       double inputTranslationDir = Math.atan2(ySpeed, xSpeed);
-      if (RunningConfig.fod) inputTranslationDir += Math.toRadians(OffsettableGyro.get() + 180);
+      if (Variables.fod) inputTranslationDir += Math.toRadians(Orangutan.get() + 180);
       double inputTranslationMag = Math.sqrt(Math.pow(xSpeed, 2) + Math.pow(ySpeed, 2));
 
       // Calculate the direction slew rate based on an estimate of the lateral acceleration
@@ -180,9 +176,9 @@ public class DriveSubsystem extends SubsystemBase {
       m_currentRotation = rot;
     }
 
-    double slow = (1 - (.5 * Controller.XBox.getLeftTriggerAxis())) * (1 - (.5 * Controller.XBox.getRightTriggerAxis()));
+    double slow = (1 - (.5 * TriggerAxis.LT.getPos())) * (1 - (.5 * TriggerAxis.RT.getPos()));
 
-    double mps = DriverStation.isTeleop() ? Dashboard.getSpeed() : Constants.AutoConstants.kMaxSpeedMetersPerSecond;
+    double mps = DriverStation.isTeleop() ? RobotContainer.m_robotDash.getSpeed() : AutoConstants.kMaxSpeedMetersPerSecond;
 
     // Convert the commanded speeds into the correct units for the drivetrain
     double xSpeedDelivered = xSpeedCommanded * mps * slow;
@@ -199,10 +195,6 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
-//    RunningConfig.lastStates[0] = new SwerveModuleState(0, swerveModuleStates[0].angle);
-//    RunningConfig.lastStates[1] = new SwerveModuleState(0, swerveModuleStates[1].angle);
-//    RunningConfig.lastStates[2] = new SwerveModuleState(0, swerveModuleStates[2].angle);
-//    RunningConfig.lastStates[3] = new SwerveModuleState(0, swerveModuleStates[3].angle);
   }
 
   /**
@@ -257,6 +249,6 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The turn rate of the robot, in degrees per second
    */
   public double getTurnRate() {
-    return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+    return m_gyro.getRate() * (GyroConstants.kReversed ? -1.0 : 1.0);
   }
 }
